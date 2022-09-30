@@ -1,9 +1,11 @@
-export default class Pan {
+import Extension from '../core/Extension';
+
+export default class Pan extends Extension {
 
     static $bindKeys = [ { key: ' ' } ] // Bind Space bar
 
     constructor(editor) {
-        this.editor = editor;
+        super(editor);
 
         this.canPan = false;
         this.isMouseDown = false;
@@ -41,8 +43,8 @@ export default class Pan {
     }
 
     setCursor() {
-        // console.log(this.canPan, this.isMouseDown)
-        if (this.canPan) this.editor.currentCursor = this.isMouseDown ? 'grabbing' : 'grab';
-        else this.editor.currentCursor = 'auto';
+        // // console.log(this.canPan, this.isMouseDown)
+        // if (this.canPan) this.editor.currentCursor = this.isMouseDown ? 'grabbing' : 'grab';
+        // else this.editor.currentCursor = 'auto';
     }
 }

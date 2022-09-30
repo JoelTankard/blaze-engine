@@ -36,7 +36,7 @@ export default {
 
 <style lang="scss" scoped>
 .editor-wrapper {
-  @apply h-screen w-screen bg-slate-100;
+  @apply h-screen w-screen bg-neutral-200;
   #editor {
     @apply h-full w-full;
   }
