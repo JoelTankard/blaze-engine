@@ -35,8 +35,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
 .editor-wrapper {
-  @apply h-screen w-screen bg-neutral-200;
+  font-family: 'Inter Tight', sans-serif;
+
+  @apply h-screen w-screen bg-slate-200;
   #editor {
     @apply h-full w-full;
   }

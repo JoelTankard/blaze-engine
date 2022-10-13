@@ -1,112 +1,138 @@
 import BlazeConfig from '../blaze.config.js';
-import { hexOpacity } from './utils/Colors';
+import { hexOpacity } from './utils/colors';
+import * as shapeUtils from './utils/shapes'
 const { colors } = BlazeConfig;
 const $ = go.GraphObject.make;
+import flex from "../core/utils/flex";
+import NodeSection from "../components/nodeSection";
+import Icon from '../components/icon.js';
 
 const CELL = 128;
+
+
+const styleTypes = {
+    'pill': {
+        shape: 'PillRectangle',
+        alignment: go.Spot.LeftCenter,
+        size: {
+            width: 128,
+            // height: 48
+        }
+    },
+    'fixture-pill': {
+        shape: 'PillRectangle',
+        alignment: go.Spot.Center,
+        fixture: true,
+        margin: 15,
+        size: {
+            // width: 128,
+            // height: 48
+        }
+    },
+    'default': {
+        shape: 'ArcRectangle',
+        alignment:  go.Spot.TopLeft,
+        size: {
+            width: 256,
+            // height: 128
+        }
+    }
+}
 
 export default class Block {
     constructor(editor) {
         this.editor = editor;
 
-        console.log('block: ', this.editor)
-        
-        this.color = colors.neutral[900];
+        this.color = colors.slate[500];
         this.style = 'default';
-        this.icon = '';
+        this.icon = 'asterisk';
+        this.title = 'Untitled Block'
         
         this.dragging = false;
         this.lastPos = null;
-        
+        this.blockStyle = null;
 
-        this.createArcRectangle();
-        this.createPillRectangle();
+        shapeUtils.createArcRectangle();
+        shapeUtils.createPillRectangle();
 
-        this.editor.click = this.$click;
-        
     }
 
-    createArcRectangle() {
-        go.Shape.defineFigureGenerator("ArcRectangle", (shape, w, h) => {
-            // this figure takes one parameter, the size of the corner
-            var p1 = 40;  // default corner size
-            var p2 = 0;
-            if (shape !== null) {
-              var param1 = shape.parameter1;
-              var param2 = shape.parameter2;
-              if (!isNaN(param1) && param1 >= 0) p1 = param1;  // can't be negative or NaN
-              if (!isNaN(param2)) p2 = param2;  // can't be negative or NaN
-            }
-            p1 = Math.min(p1, w / 2);
-            p1 = Math.min(p1, h / 2); 
-             // limit by whole height or by half height?
-            var geo = new go.Geometry();
-            // a single figure consisting of straight lines and quarter-circle arcs
-            geo.add(new go.PathFigure(0, p1 + p2)
-                     .add(new go.PathSegment(go.PathSegment.QuadraticBezier, p1, p2, 0, p2))
-                     .add(new go.PathSegment(go.PathSegment.Line, w - p1, p2))
-                     .add(new go.PathSegment(go.PathSegment.QuadraticBezier, w, p1 + p2, w, p2))
-                     .add(new go.PathSegment(go.PathSegment.Line, w, (h + p2) - p1))
-                     .add(new go.PathSegment(go.PathSegment.QuadraticBezier, w - p1, h + p2, w, h + p2))
-                     .add(new go.PathSegment(go.PathSegment.Line, p1, h + p2))
-                     .add(new go.PathSegment(go.PathSegment.QuadraticBezier, 0, (h + p2) - p1, 0, h + p2).close()));
-  
-            return geo;
-          });
+
+    iconElement() {
+        return $(go.Panel, "Spot",
+            { 
+                alignment: go.Spot.LeftCenter
+            },
+            $(go.Shape, "Circle", {
+                fill: this.blockStyle.fixture ? this.color : this.$color.black,
+                stroke: null,
+                height: 28,
+                width: 28,
+            }),
+            new Icon({ name: this.icon, fill:  this.blockStyle.fixture ? this.$color.black : this.color, size: 12 })
+        )
     }
 
-    createPillRectangle() {
-        go.Shape.defineFigureGenerator("PillRectangle", (shape, w, h) => {
-            // this figure takes one parameter, the size of the corner
-            var p1 = h/2;  // default corner size
-            var p2 = 0;
-            if (shape !== null) {
-                var param2 = shape.parameter2;
-                if (!isNaN(param2)) p2 = param2;  // can't be negative or NaN
-              }
-             // limit by whole height or by half height?
-            var geo = new go.Geometry();
-            // a single figure consisting of straight lines and quarter-circle arcs
-            geo.add(new go.PathFigure(p1, p2)
-                .add(new go.PathSegment(go.PathSegment.Line, w - p1, p2))
-                .add(new go.PathSegment(go.PathSegment.Bezier, w - p1, p2 + h, w + (p1/2), p2, w + (p1/2), p2 + h))
-                .add(new go.PathSegment(go.PathSegment.Line, p1, p2 + h))
-                .add(new go.PathSegment(go.PathSegment.Bezier, p1, p2, -(p1/2), p2 + h, -(p1/2), p2).close()));
-  
-            return geo;
-          });
-    }
+    titleElement() {
+        return flex('row', {
+                alignItems: 'center',
+                margin: this.blockStyle?.margin || new go.Margin(10,15, 0 , 15),
+            },
 
-    $click(e) {
-        e.diagram.commit((d) => { d.clearHighlighteds(); }, "no highlighteds")
+            //     alignment: go.Spot.LeftCenter,
+            //     stretch: go.Spot.Fill
+            // },
+                this.iconElement(),
+                $(go.TextBlock, this.title, {
+                    verticalAlignment: go.Spot.Center,
+                    margin: new go.Margin(0,0,0,5),
+                    stroke: this.blockStyle.fixture ? this.$color.slate[200] : this.$color.black,
+                    font: "500 italic 10pt Inter Tight"
+                })
+            // )
+            
+        )
     }
 
 
     nodeTemplate() {
-        const styleTypes = {
-            'pill': {
-                shape: 'PillRectangle',
-                style: {
-                    width: 128,
-                    height: 48
-                }
-            },
-            'default': {
-                shape: 'ArcRectangle',
-                style: {
-                    width: 256,
-                    height: 128
-                }
-            }
-        }
-        
-        const blockStyle = styleTypes[this.style];
+        this.blockStyle = styleTypes[this.style];
+
+        // const color =  this.blockStyle.fixture ? this.$color.black : this.color;
 
         const block =  $(go.Node, 'Spot', {
                 cursor: 'grab',
-                selectionAdornmentTemplate: 'none',
-                locationSpot: go.Spot.Center, locationObjectName: "Block",
-                click: this.onBlockClick
+                // selectionAdornmentTemplate: $(go.Adornment, "Auto",
+                //     $(go.Panel, "Auto",
+                //     {
+                //         defaultStretch: go.GraphObject.Horizontal,
+                //     },
+                //         $(go.Shape, this.blockStyle.shape, {
+                //             fill: null,
+                //             stroke: this.$color.white, 
+                //             strokeWidth: 3,
+                //         }),
+                //         // $(go.Shape, this.blockStyle.shape, {
+                //         //     fill: null,
+                //         //     stroke: this.$color.white, 
+                //         //     strokeWidth: 1,
+                //         // }),
+                //     ),
+                //     // new go.Binding("strokeWidth", "isSelected", (isTrue, node) => {
+                //     //     const maxSize = isTrue ? 3 : 0;
+                //     //     node.spot1 =  new go.Spot(0,0, maxSize/2, maxSize/2);
+                //     //     node.spot2 = new go.Spot(1,1,-maxSize/2,-maxSize/2);
+                //     //     return  maxSize
+                //     // }).ofObject(),
+                //     // new go.AnimationTrigger('strokeWidth', { duration: 100 }),
+                //     // new go.AnimationTrigger('spot1', { duration: 100 }),
+                //     // new go.AnimationTrigger('spot2', { duration: 100 })
+                    
+                // $(go.Placeholder)),
+                locationSpot: go.Spot.Center, 
+                locationObjectName: "Block",
+                click: (e, node) => this.onBlockClick(e,node),
+                
             },
             
             $(go.Panel, "Auto",
@@ -115,57 +141,75 @@ export default class Block {
                     stretch: go.GraphObject.Fill,
                     alignment: go.Spot.Center,
                 },
-                $(go.Shape, blockStyle.shape,{
-                    // isGeometryPositioned: true.
-                    name: 'HighlightOutline',
-                    fill: null,
-                    stroke: hexOpacity(this.color, 0.5), 
-                    strokeWidth: 1,
-                    alignment: go.Spot.Center,
-                    spot1: new go.Spot(0,0, 0, 0),
-                    spot2: new go.Spot(1,1,0,0)
-                },
-                new go.Binding("strokeWidth", "isSelected", (isTrue, node) => {
-                    const maxSize = isTrue ? 6 : 0;
-                    node.spot1 =  new go.Spot(0,0, maxSize/2, maxSize/2);
-                    node.spot2 = new go.Spot(1,1,-maxSize/2,-maxSize/2);
-                    return  maxSize
-                }).ofObject(),
-                
-                new go.AnimationTrigger('strokeWidth', { duration: 100 }),
-                new go.AnimationTrigger('spot1', { duration: 100 }),
-                new go.AnimationTrigger('spot2', { duration: 100 })
-                ),
-                
-                $(go.Shape, blockStyle.shape, {
-                    parameter1: 33,
-                    name: 'Block',
-                    fill: this.$color.white,
-                    strokeWidth: 4,
-                    stroke: this.color,
-                    ...blockStyle.style,
-                }),
-              
-                // new go.Binding("strokeWidth", this.dragging, () => this.dragging ? 12 : 6 )),
-                // new go.Binding("spot1", this.dragging, () => this.dragging ? 12 : 6 ),
-                // new go.Binding("spot2", this.dragging, () => this.dragging ? 12 : 6 ),
-                // new go.AnimationTrigger('strokeWidth')),
-
                
-                // $(go.Shape, blockStyle.shape, {
-                //     parameter1: 34,
-                //     fill: null,
-                //     stroke: this.color, 
-                //     strokeWidth: 4,
-                //     margin: new go.Margin(2),
-                //     ...blockStyle.style,
-                // }),
-        //    )
-            // new go.Binding("shadowOffset", "isSelected", (s) => s ? new go.Point(0, liftHeight) :  new go.Point(0, 2) ).ofObject()
+
+                $(go.Panel, "Auto",
+                    {
+                        // defaultStretch: go.GraphObject.Horizontal,
+                        defaultAlignment: go.Spot.TopLeft,
+                      
+                    },
+                    $(go.Shape, this.blockStyle.shape, {
+                        name: 'BlockBackground',
+                        parameter1: true,
+                        name: 'Block',
+                        fill: this.blockStyle.fixture ? this.$color.black : this.color,
+                        stroke: null,
+                    }),
+                    $(go.Panel, "Vertical",
+                        {
+                            defaultStretch: go.GraphObject.Horizontal,
+                            defaultAlignment: go.Spot.TopLeft,
+                            margin:  this.blockStyle.fixture ? 0 : new go.Margin(0,0,15, 0),
+                            ...this.blockStyle.size,
+                        },
+                    // {
+                    //     ...this.blockStyle.size,
+                    // },
+                    //     {
+                    //         // alignment: this.blockStyle.alignment,
+                    //         stretch: go.GraphObject.Fill,
+                    //     },
+
+                        // new go.Binding("margin", "isSelected", (isTrue) => isTrue ? 18 : 12).ofObject(),
+                        // new go.AnimationTrigger('margin', { duration: 100 }),
+                    // flex('column',
+                    //     {
+                    //         stretch: true,
+                    //     },
+
+                        
+                        ( this.blockStyle?.fixture ? 
+                            new NodeSection({ fixture: true }, this.titleElement()) :
+                            this.titleElement()
+                        ),
+                        // $(go.Shape, { fill: this.$color.blue[300], height: 20 }),
+                        // $(go.Shape, { fill: this.$color.blue[300], height: 20 }),
+                        // $(go.Shape, { fill: this.$color.blue[300], height: 20 }),
+
+                        
+                        // flex('column', {
+                        //         stretch: true
+                        //     },
+                            ( this.render ? this.render() : '' )
+                        // )
+                    )
+                        // $(go.Panel, "Vertical", {
+                        //         stretch: go.Spot.Fill
+                        //     },
+                      
+                            // $(go.Shape, "ArcRectangle", { fill: this.$color.red[300] }),
+                            
+                            // new Icon({ name: 'flag', fill: this.$color.black, size: 12 })
+                            // $(go.Panel, "Auto", 
+                            //     (() => { if (this.render) return this.render() })()
+                            // ),
+                        // ),
+                    // )
+                )
             )
         );
         // new go.TextBlock({ margin: 6, font: "18px sans-serif" }).bind("key"))
-
 
         const outlineCal = (HighlightOutline) => {
             const maxSize = this.dragging ? 12 : 6;
@@ -209,7 +253,9 @@ export default class Block {
 
 
     onBlockClick(e, node) {
+          
         var diagram = node.diagram;
+       
         diagram.startTransaction("highlight");
         // remove any previous highlighting
         diagram.clearHighlighteds();
@@ -218,31 +264,66 @@ export default class Block {
         // for each Node destination for the Node, set Node.isHighlighted
         node.findNodesOutOf().each(function(n) { n.isHighlighted = true; });
         diagram.commitTransaction("highlight");
-
+      
+        this.$click(e);
     }
 
     linkTemplate() {
+
+        const color =  this.blockStyle.fixture ? this.$color.neutral[500] : this.color;
         // console.log('this.editor', this.editor)
         const link = new go.Link({ 
             routing: go.Link.AvoidsNodes,
-            corner: CELL/2,
+            corner: 30,
             curve: go.Link.JumpGap,
-            fromEndSegmentLength: CELL/4,
-            toEndSegmentLength: CELL/4,
+            fromEndSegmentLength: 30,
+            toEndSegmentLength: 30,
             toShortLength: 4,
+            fromShortLength: 0,
             // curviness: CELL/4,
+            selectionAdornmentTemplate: 'none'
+            //    $(go.Adornment,
+            //     $(go.Shape, { isPanelMain: true, strokeWidth: 6, stroke: hexOpacity(this.color, 0.5) })
+            // ),
         })
         .add(
             $(go.Shape, 
-                { name: 'Link', strokeWidth: 3, stroke: colors.black },
-                new go.Binding("strokeDashArray", "isHighlighted", (isTrue) => isTrue ? [10, 10] : [0,0]).ofObject()
+                { isPanelMain: true, name: 'Link', strokeWidth: 3, stroke: colors.black },
+                new go.Binding("strokeDashArray", "isHighlighted", (isTrue) => isTrue ? [10, 10] : [0,0]).ofObject(),
+                new go.Binding("stroke", "isSelected", (isTrue) => isTrue ? color : colors.black).ofObject()
             )
         )
-        .add(new go.Shape({ toArrow: "OpenTriangle", strokeWidth: 3, strokeCap: 'round', stroke: colors.black }))
+        .add(
+            $(go.Shape,
+                { toArrow: "OpenTriangle", strokeWidth: 3, strokeCap: 'round', stroke: colors.black, strokeJoin: 'round' },
+                new go.Binding("stroke", "isSelected", (isTrue) => isTrue ? color : colors.black).ofObject()
+            )
+        )
+
+        // .add(new go.Shape({ toArrow: "OpenTriangle", strokeWidth: 3, strokeCap: 'round', stroke: colors.black }))
 
         
-       
+        process.nextTick(() => this.startAnimations());
+
         return link
+    }
+
+    startAnimations() {
+        // Animate the flow in the pipes
+        const animation = new go.Animation();
+        animation.easing = go.Animation.EaseLinear;
+        this.editor.links.each(link => animation.add(link.findObject("Link"), "strokeDashOffset", 20, 0));
+        // Run indefinitely
+        animation.runCount = Infinity;
+        animation.start();
+    }
+
+    $blur(e) {
+        e.diagram.commit((d) => { d.clearHighlighteds(); }, "no highlighteds")
+    }
+
+    $click(e) {
+        return;
     }
     
 }

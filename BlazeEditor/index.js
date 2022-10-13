@@ -18,6 +18,9 @@ const mouseEvents = {
   mouseMove: { blaze: '$mouseMove', gojs: 'doMouseMove' }
 }
 
+const blockMouseEvents = {
+  click: { blaze: '$blur', gojs: 'click' },
+}
 // mouseMove: { blaze: '$onMouseMove', gojs: 'doMouseMove' }
 
 export default class BlazeEditor {
@@ -27,14 +30,18 @@ export default class BlazeEditor {
         this.extensions = {};
         this.bindKeys = {};
         this.bindMouseEvents = {};
+        this.bindBlockMouseEvents = {};
+
         this.isReady = false;
         this.file = null;
+
+        this.blocks = {};
+        this.defaultBlock = null;
         
         Promise.all([
           this.attachPlugins(),
           this.attachBlocks(),
         ]).then(() => {
-          console.log('here')
           this.isReady = true;
           this.load(this.file);
           document.querySelector(`#${elementId} canvas`).focus();
@@ -97,6 +104,7 @@ export default class BlazeEditor {
             this.blaze.editor.toolManager[event.gojs] = () => this.onMouseEvent(event)
           });
 
+
           reslove();
         }).catch((err) => {
           reject(err);
@@ -116,20 +124,32 @@ export default class BlazeEditor {
 
           // Loop through block
           blockManager.listPluginList().forEach(({ id, name, instance }) => {
-              const block = new instance.default(editor);
+              this.blocks[id] = new instance.default(editor);
 
-              nodeMap.add(name, block.nodeTemplate());
-              linkMap.add(name, block.linkTemplate());
+              nodeMap.add(name, this.blocks[id].nodeTemplate());
+              linkMap.add(name, this.blocks[id].linkTemplate());
+
+              Object.keys(blockMouseEvents).forEach((eventName) => {
+                const event = blockMouseEvents[eventName];
+                if (!this.bindBlockMouseEvents[event.blaze]) this.bindBlockMouseEvents[event.blaze] = [];
+                if (this.blocks[id][event.blaze]) this.bindBlockMouseEvents[event.blaze].push({ name, id });
+              });
             });
 
-            const defaultBlock = new Block(editor);
+            this.defaultBlock = new Block(editor);
 
-            nodeMap.add("", defaultBlock.nodeTemplate());
-            linkMap.add("", defaultBlock.linkTemplate());
+            nodeMap.add("", this.defaultBlock.nodeTemplate());
+            linkMap.add("", this.defaultBlock.linkTemplate());
             
             editor.nodeTemplateMap = nodeMap;
             // editor.linkTemplate = defaultBlock.linkTemplate();
             editor.linkTemplateMap = linkMap;
+
+            Object.keys(blockMouseEvents).forEach((eventName) => {
+              const event = blockMouseEvents[eventName];
+              this.blaze.editor[event.gojs] = (e) => this.onBlockMouseEvent(event,e)
+            });
+            
             reslove();
         }).catch((err) => {
           reject(err);
@@ -157,10 +177,24 @@ export default class BlazeEditor {
       if (bindedEvent) {
         bindedEvent.forEach(({ id }) => {
           this.extensions[id][event.blaze]();
-        })
-        
+        })        
       }
     }
+
+    // TODO: revisit Blur
+    onBlockMouseEvent(event, e) {
+      const bindedEvent = this.bindBlockMouseEvents[event.blaze];
+      this.blaze.editor.lastInput.bubbles = true
+      if (bindedEvent) {
+        bindedEvent.forEach(({ id }) => {
+          this.blocks[id][event.blaze](e);
+        })  
+        this.defaultBlock[event.blaze](e);    
+      }
+    }
+
+    $nextTick(func) { process.nextTick(func) }
+
     load(file) {
       this.file = file;
       if (!this.isReady) return;
@@ -177,10 +211,8 @@ export default class BlazeEditor {
                   { from: "Alpha", to: "Gamma", category: 'Start' },
                   { from: "Beta", to: "Beta", category: 'Button' },
                   { from: "Gamma", to: "Delta", category: 'FreeText' },
-                  { from: "Delta", to: "Alpha",category: 'Message' }
+                  { from: "Delta", to: "Beta", category: 'Message' }
                 ]);
-                
-
-                this.blaze.startAnimations()
     }
 }
+

@@ -11,6 +11,7 @@ export default class Pan extends Extension {
         this.isMouseDown = false;
 
         this.editor.toolManager.panningTool.canStart = () => this.canPan;
+
     }
 
     $keyDown({ key }) {

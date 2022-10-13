@@ -3,12 +3,20 @@ export default {
         { src: 'start.js', name: 'Start' },
         { src: 'message.js', name: 'Message' },
         { src: 'button.js', name: 'Button' },
+        { src: 'freeText.js', name: 'FreeText' },
     ],
     extensions: [
         { src: 'zoom.js', name: 'Zoom' },
         { src: 'pan.js', name: 'Pan' },
     ],
     colors: {
+        operator: {
+            purple: '#8D78FE',
+            green: '#01E498',
+            yellow: '#FED234',
+            orange: '#FE7E45',
+            pink: '#E42FE4',
+        },
         inherit: 'inherit',
         current: 'currentColor',
         transparent: 'transparent',

@@ -1,5 +1,5 @@
 import Extension from '../core/Extension';
-import { ease } from '../core/utils/Animation';
+import { ease } from '../core/utils/animation';
 
 const ZOOM_FACTOR = 0.25;
 export default class Zoom extends Extension {
