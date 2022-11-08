@@ -76,7 +76,7 @@ export default class Block {
     titleElement() {
         return flex('row', {
                 alignItems: 'center',
-                margin: this.blockStyle?.margin || new go.Margin(10,15, 0 , 15),
+                margin: this.blockStyle?.margin || new go.Margin(10,15, 10 , 15),
             },
 
             //     alignment: go.Spot.LeftCenter,
@@ -102,6 +102,19 @@ export default class Block {
 
         const block =  $(go.Node, 'Spot', {
                 cursor: 'grab',
+                toSpot: go.Spot.NotRightSide,
+                selectionAdornmentTemplate: $(go.Adornment, "Auto",
+                $(go.Panel, "Auto",
+                    {
+                        defaultStretch: go.GraphObject.Horizontal,
+                    },
+                    $(go.Shape, this.blockStyle.shape, {
+                        fill: null,
+                        stroke: this.$color.blue[500], 
+                        strokeWidth: 3,
+                    }),
+                ),
+                $(go.Placeholder)),
                 // selectionAdornmentTemplate: $(go.Adornment, "Auto",
                 //     $(go.Panel, "Auto",
                 //     {
@@ -281,7 +294,7 @@ export default class Block {
             toShortLength: 4,
             fromShortLength: 0,
             // curviness: CELL/4,
-            selectionAdornmentTemplate: 'none'
+            // selectionAdornmentTemplate: 'none'
             //    $(go.Adornment,
             //     $(go.Shape, { isPanelMain: true, strokeWidth: 6, stroke: hexOpacity(this.color, 0.5) })
             // ),
@@ -290,13 +303,13 @@ export default class Block {
             $(go.Shape, 
                 { isPanelMain: true, name: 'Link', strokeWidth: 3, stroke: colors.black },
                 new go.Binding("strokeDashArray", "isHighlighted", (isTrue) => isTrue ? [10, 10] : [0,0]).ofObject(),
-                new go.Binding("stroke", "isSelected", (isTrue) => isTrue ? color : colors.black).ofObject()
+                // new go.Binding("stroke", "isSelected", (isTrue) => isTrue ? color : colors.black).ofObject()
             )
         )
         .add(
             $(go.Shape,
                 { toArrow: "OpenTriangle", strokeWidth: 3, strokeCap: 'round', stroke: colors.black, strokeJoin: 'round' },
-                new go.Binding("stroke", "isSelected", (isTrue) => isTrue ? color : colors.black).ofObject()
+                // new go.Binding("stroke", "isSelected", (isTrue) => isTrue ? color : colors.black).ofObject()
             )
         )
 

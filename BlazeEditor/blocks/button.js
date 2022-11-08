@@ -10,14 +10,14 @@ export default class Button extends Block {
     constructor(editor) {
         super(editor);
         
-        this.color = this.$color.emerald[400];
+        this.color = this.$color.green[400];
         this.title = 'Button';
         this.icon = 'button';
     }
 
     render() {
         return new NodeSection(
-            new Textarea({ placeholder: 'Type question', value: ''})
+            new Textarea({ placeholder: 'Type question', value: 'This is a button block, how cool?'})
         );
     }
 }

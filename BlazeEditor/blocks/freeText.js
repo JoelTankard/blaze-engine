@@ -1,5 +1,6 @@
 
 import Block from "../core/Block";
+import NodeSection from "../components/nodeSection";
 import Textarea from "../components/textarea";
 export default class FreeText extends Block {
     constructor(editor) {
@@ -11,6 +12,8 @@ export default class FreeText extends Block {
     }
 
     render() {
-        return new Textarea({ placeholder: 'Type question', value: ''});
+        return new NodeSection(
+            new Textarea({ placeholder: 'Type question', value: 'Free text question would go here'})
+        );
     }
 }

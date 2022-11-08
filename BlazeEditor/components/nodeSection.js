@@ -1,5 +1,5 @@
 import Component from "../core/Component";
-import uniqid from 'uniqid';
+// import uniqid from 'uniqid';
 import flex from "../core/utils/flex";
 import { Margin } from "gojs";
 
@@ -45,7 +45,7 @@ export default class NodeSection extends Component {
                             fill: null,
                             fromLinkable: true,
                             fromSpot: go.Spot.Right,
-                            portId: uniqid(),
+                            portId: options?.portId || 'default',
                         }
                     )
                 ),

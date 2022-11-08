@@ -199,20 +199,22 @@ export default class BlazeEditor {
       this.file = file;
       if (!this.isReady) return;
       const { editor } = this.blaze;
-              editor.model = new go.GraphLinksModel(
-                [
+              editor.model = new go.GraphLinksModel({
+                linkFromPortIdProperty: 'fromPort',
+                nodeDataArray: [
                   { key: "Alpha", category: 'Start'},
                   { key: "Beta", category: 'Button' },
                   { key: "Gamma", category: 'FreeText'},
                   { key: "Delta", category: 'Message' }
                 ],
-                [
-                  { from: "Alpha", to: "Beta", category: 'Start' },
-                  { from: "Alpha", to: "Gamma", category: 'Start' },
-                  { from: "Beta", to: "Beta", category: 'Button' },
+                linkDataArray: [
+                  { from: "Alpha", fromPort: "default", to: "Beta", category: 'Start' },
+                  { from: "Alpha",  fromPort: "default", to: "Gamma", category: 'Start' },
+                  { from: "Beta",  fromPort: "default", to: "Delta", category: 'Button' },
                   { from: "Gamma", to: "Delta", category: 'FreeText' },
                   { from: "Delta", to: "Beta", category: 'Message' }
-                ]);
+                ]
+              });
     }
 }
 
