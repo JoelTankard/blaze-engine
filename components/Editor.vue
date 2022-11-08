@@ -1,19 +1,16 @@
 <template>
   <div class="editor-wrapper">
-   
-    <div id="editor"></div>
-
+    <div id="editor" />
   </div>
 </template>
 
-
 <script>
 
-  import BlazeEditor from '@/BlazeEditor'
+import BlazeEditor from '@/BlazeEditor'
 
 export default {
   name: 'Editor',
-  data() {
+  data () {
     return {
       editor: null,
       file: {
@@ -21,13 +18,12 @@ export default {
       }
     }
   },
-  mounted() {
-    this.editor = new BlazeEditor("editor")
-    this.editor.load();
-
+  mounted () {
+    this.editor = new BlazeEditor('editor')
+    this.editor.load()
   },
   methods: {
-    createEditor() {
+    createEditor () {
 
     }
   }

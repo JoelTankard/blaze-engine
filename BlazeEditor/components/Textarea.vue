@@ -1,11 +1,11 @@
 <template>
-    <textarea></textarea>
+  <textarea />
 </template>
 
 <script>
-    export default {
-        name: 'Textarea',
-    }
+export default {
+  name: 'Textarea'
+}
 </script>
 
 <style scoped>

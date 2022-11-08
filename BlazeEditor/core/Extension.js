@@ -1,5 +1,5 @@
 export default class Extension {
-    constructor(editor) {
-        this.editor = editor;
-    }
+  constructor (editor) {
+    this.editor = editor
+  }
 }
